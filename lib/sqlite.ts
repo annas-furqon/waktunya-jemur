@@ -12,7 +12,14 @@ export async function openDatabase(filename: string) {
     });
   }
 
-  const dbPath = path.join(process.cwd(), filename);
+  const publicDbPath = path.join(process.cwd(), "public", filename);
+  const localDbPath = path.join(process.cwd(), filename);
+  const dbPath = fs.existsSync(publicDbPath) ? publicDbPath : localDbPath;
+
+  if (!fs.existsSync(dbPath)) {
+    throw new Error(`SQLite database not found at ${publicDbPath} or ${localDbPath}`);
+  }
+
   const dbBuffer = fs.readFileSync(dbPath);
   return new SQL.Database(dbBuffer);
 }
