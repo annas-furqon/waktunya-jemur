@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import Database from "better-sqlite3";
+import { openDatabase } from "@/lib/sqlite";
 import path from "path";
 
 export async function GET(request: NextRequest) {
@@ -12,8 +12,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Open database
-    const dbPath = path.join(process.cwd(), "data", "wilayah.db");
-    const db = new Database(dbPath, { readonly: true });
+    const db = await openDatabase("data/wilayah.db");
 
     try {
       // Normalize search query to lowercase
@@ -48,17 +47,22 @@ export async function GET(request: NextRequest) {
         ORDER BY match_priority ASC, nama ASC
         LIMIT 100
       `);
-      const results = stmt.all(
-        searchQuery, searchQuery, searchQuery, searchQuery, searchQuery,
-        searchQuery, searchQuery, searchQuery, searchQuery, searchQuery
-      ) as Array<{
+      const bindValues = Array(10).fill(searchQuery);
+      stmt.bind(bindValues);
+
+      const results: Array<{
         kode: string;
         nama: string;
         province_name: string;
         district_name: string;
         sub_district_name: string;
         match_priority: number;
-      }>;
+      }> = [];
+
+      while (stmt.step()) {
+        results.push(stmt.getAsObject() as any);
+      }
+      stmt.free();
 
       // Filter results to only include village-level codes (4 parts: XX.XX.XX.XXXX)
       const validResults = results.filter((loc) => {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import Database from "better-sqlite3";
+import { openDatabase } from "@/lib/sqlite";
 import path from "path";
 
 // BMKG weather code descriptions
@@ -333,15 +333,25 @@ export async function GET(request: NextRequest) {
     }
 
     // Validate location exists in SQLite database
-    const dbPath = path.join(process.cwd(), "data", "wilayah.db");
-    const db = new Database(dbPath, { readonly: true });
+    const db = await openDatabase("data/wilayah.db");
 
-    const location = db
-      .prepare(
-        "SELECT kode, nama, province_name, district_name, sub_district_name FROM wilayah WHERE kode = ?"
-      )
-      .get(locationId);
+    const stmt = db.prepare(
+      "SELECT kode, nama, province_name, district_name, sub_district_name FROM wilayah WHERE kode = ?"
+    );
+    stmt.bind([locationId]);
 
+    let location: {
+      kode: string;
+      nama: string;
+      province_name: string;
+      district_name: string;
+      sub_district_name: string;
+    } | null = null;
+
+    if (stmt.step()) {
+      location = stmt.getAsObject() as any;
+    }
+    stmt.free();
     db.close();
 
     if (!location) {
