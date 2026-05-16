@@ -19,6 +19,7 @@ export const metadata: Metadata = {
   title: "Jemur Yuk! - Cek Waktu Jemur Baju",
   description:
     "Aplikasi bantu cek cuaca buat jemur baju. Gak perlu ribet, tinggal cek aja!",
+  icons: "/sun-icon.png",
 };
 
 export const viewport: Viewport = {

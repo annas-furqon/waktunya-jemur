@@ -9,7 +9,7 @@ interface CoffeeButtonProps {
 export function CoffeeButton({ isDark }: CoffeeButtonProps) {
   return (
     <a
-      href="https://www.buymeacoffee.com"
+      href="https://saweria.co/annasfurqon"
       target="_blank"
       rel="noopener noreferrer"
       className={`group flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-bold shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95 ${
